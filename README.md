@@ -16,6 +16,12 @@ C'est le bloc **« Client · IHM »** de l'architecture : elle parle au serveur 
 
 ## Mettre l'app sur l'iPhone
 
+**En ligne (le plus simple)** : ouvre **https://ryossgh.github.io/Croqi/** dans Safari, puis **Partager** → **Sur l'écran d'accueil**. Pas besoin du PC.
+
+> En ligne, l'app est en HTTPS : le navigateur bloquera les appels vers un serveur en `http://` sur le réseau local. Le mode démo marche partout ; pour le vrai distributeur, utilise la version locale ci-dessous (ou un serveur en HTTPS).
+
+**En local, depuis le PC** :
+
 1. Double-clique sur `Lancer-Croqi.bat` (autorise Java dans le pare-feu Windows si demandé, réseau privé).
 2. Sur l'iPhone, **même Wi-Fi que le PC**, ouvre Safari à l'adresse affichée (ex. `http://192.168.1.20:8000`).
 3. Bouton **Partager** → **Sur l'écran d'accueil** → Ajouter.

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Croqi</title>
+<meta name="theme-color" content="#14202B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Croqi">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ CONNEXION ============ -->
+<section id="login" class="screen login" hidden>
+  <div class="login-head">
+    <img src="icons/icon-192.png" alt="" class="login-logo" width="72" height="72">
+    <h1>Croqi</h1>
+    <p>Le distributeur de croquettes connecté</p>
+  </div>
+  <form id="loginForm" class="card login-card" autocomplete="on">
+    <label for="lgUser">Identifiant</label>
+    <input id="lgUser" name="username" autocomplete="username" autocapitalize="none" required>
+    <label for="lgPass">Mot de passe</label>
+    <input id="lgPass" name="password" type="password" autocomplete="current-password" required>
+    <label for="lgServer">Adresse du serveur</label>
+    <input id="lgServer" name="server" inputmode="url" autocapitalize="none" placeholder="http://192.168.1.20:8080">
+    <p id="loginErr" class="err" role="alert"></p>
+    <button type="submit" class="btn btn-primary">Se connecter</button>
+    <button type="button" id="demoBtn" class="btn btn-ghost">Essayer en mode démo</button>
+  </form>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="brand">croqi</div>
+    <div id="linkPill" class="pill"><span class="dot"></span><span id="linkTxt">…</span></div>
+  </header>
+
+  <main>
+    <!-- Accueil -->
+    <section id="tab-home" class="tab">
+      <div id="alerts"></div>
+
+      <div class="card level-card">
+        <div class="gauge" id="gauge" role="img" aria-label="Niveau de croquettes">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="50" class="g-track"/>
+            <circle cx="60" cy="60" r="50" class="g-fill" id="gaugeFill"/>
+          </svg>
+          <div class="gauge-txt"><b id="lvl">–</b><span>du réservoir</span></div>
+        </div>
+        <div class="level-side">
+          <div class="kicker">Croquettes</div>
+          <div id="lvlLabel" class="level-label">–</div>
+          <div class="muted small" id="lvlGrams">–</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="card stat">
+          <div class="kicker">Dernier repas</div>
+          <div class="stat-v" id="lastMeal">–</div>
+          <div class="muted small" id="lastMealAt">–</div>
+        </div>
+        <div class="card stat">
+          <div class="kicker">Passages aujourd'hui</div>
+          <div class="stat-v" id="passes">–</div>
+          <div class="muted small" id="lastPass">–</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <div>
+            <div class="kicker">Mode</div>
+            <div class="muted small" id="modeHint">–</div>
+          </div>
+          <div class="seg" role="group" aria-label="Mode de fonctionnement">
+            <button type="button" data-mode="AUTO">Auto</button>
+            <button type="button" data-mode="MANUAL">Manuel</button>
+          </div>
+        </div>
+        <div class="next" id="nextMeal"></div>
+      </div>
+
+      <div class="card serve">
+        <div class="kicker">Servir maintenant</div>
+        <div class="serve-row">
+          <div class="stepper">
+            <button type="button" id="pMinus" aria-label="Une portion de moins">−</button>
+            <output id="pCount">1</output>
+            <button type="button" id="pPlus" aria-label="Une portion de plus">+</button>
+          </div>
+          <div class="muted small" id="pGrams">≈ 20 g</div>
+        </div>
+        <button type="button" id="serveBtn" class="btn btn-primary btn-big">Servir 1 portion</button>
+      </div>
+    </section>
+
+    <!-- Planning -->
+    <section id="tab-plan" class="tab" hidden>
+      <h2>Planning des repas</h2>
+      <p class="muted">Jusqu'à 6 repas par jour, de 1 à 5 portions (≈ 20 g). Utilisé en mode automatique.</p>
+      <div id="planList" class="plan-list"></div>
+      <button type="button" id="addMeal" class="btn btn-ghost">+ Ajouter un repas</button>
+      <div class="plan-total muted" id="planTotal"></div>
+      <button type="button" id="savePlan" class="btn btn-primary" disabled>Envoyer au distributeur</button>
+    </section>
+
+    <!-- Historique -->
+    <section id="tab-hist" class="tab" hidden>
+      <h2>Historique</h2>
+      <div class="card">
+        <div class="row-between">
+          <div class="kicker">7 derniers jours</div>
+          <div class="legend"><span class="lg lg-meal"></span>Portions <span class="lg lg-pass"></span>Passages</div>
+        </div>
+        <div id="chart" class="chart" role="img" aria-label="Portions et passages des 7 derniers jours"></div>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrer">
+        <button type="button" class="chip on" data-f="ALL">Tout</button>
+        <button type="button" class="chip" data-f="MEAL">Repas</button>
+        <button type="button" class="chip" data-f="PASS">Passages</button>
+        <button type="button" class="chip" data-f="ALERT">Alertes</button>
+      </div>
+      <div id="histList"></div>
+    </section>
+
+    <!-- Réglages -->
+    <section id="tab-set" class="tab" hidden>
+      <h2>Réglages</h2>
+      <div class="card form">
+        <label for="hungerH">Alerte si pas de repas depuis</label>
+        <div class="inline"><input id="hungerH" type="number" min="1" max="48" inputmode="numeric"><span>heures</span></div>
+        <label for="lowPct">Alerte niveau bas sous</label>
+        <div class="inline"><input id="lowPct" type="number" min="5" max="50" inputmode="numeric"><span>%</span></div>
+        <button type="button" id="saveSet" class="btn btn-primary">Enregistrer</button>
+      </div>
+      <div class="card form">
+        <div class="kicker">Connexion</div>
+        <div class="kv"><span>Utilisateur</span><b id="whoUser">–</b></div>
+        <div class="kv"><span>Serveur</span><b id="whoServer">–</b></div>
+        <div class="kv"><span>Liaison objet</span><b id="whoLink">–</b></div>
+        <button type="button" id="logout" class="btn btn-ghost">Se déconnecter</button>
+      </div>
+      <p class="muted small center">Croqi · SAÉ 3.03 · BUT R&amp;T</p>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <button type="button" data-tab="home" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+    <button type="button" data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Planning</button>
+    <button type="button" data-tab="hist"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Historique</button>
+    <button type="button" data-tab="set"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Réglages</button>
+  </nav>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
